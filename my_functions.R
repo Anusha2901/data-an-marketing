@@ -177,4 +177,71 @@ bar_charts(dtm)
 }
 
 
+senti_an_bing = function(x){
+  
+  bing = get_sentiments("bing") 
+  senti.bing = x %>%
+    mutate(linenumber = row_number()) %>%   # build line num variable
+    ungroup() %>%
+    unnest_tokens(word, text) %>%
+    inner_join(get_sentiments("bing")) %>%
+    count(sentiment, index = linenumber %/% 1, sort = FALSE) %>%
+    mutate(method = "bing")
+  
+  bing_df = data.frame(senti.bing %>% spread(sentiment, n, fill = 0))
+  
+  bing_pol = bing_df %>% 
+    mutate(polarity = (positive - negative)) %>%   #create variable polarity = pos - neg
+    arrange(desc(polarity), index)
+  
+  return(bing_pol)
+  
+}
+
+senti_an_afinn = function(x){
+  AFINN = get_sentiments("afinn")
+  
+  senti.afinn = x %>%
+    mutate(linenumber = row_number()) %>%
+    ungroup() %>%
+    unnest_tokens(word, text) %>%
+    inner_join(AFINN) %>%    # returns only intersection of wordlists and all columns
+    group_by(index = linenumber %/% 1) %>% 
+    summarise(sentiment = sum(score)) %>% 
+    mutate(method = "afinn")
+  
+  return(senti.afinn)
+}
+
+senti_an_nrc = function(x){
+  
+nrc = get_sentiments("nrc")
+  
+senti.nrc = x %>%
+  mutate(linenumber = row_number()) %>%
+  ungroup() %>%
+  unnest_tokens(word, text) %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(sentiment, index = linenumber %/% 1, sort = FALSE) %>%  # %/% gives quotient
+  mutate(method = "nrc")
+
+a = data.frame(senti.nrc %>% spread(sentiment, n, fill = 0))
+
+return(a)
+
+}
+
+top_emotion_words = function(x,emotion){
+  
+nrc = get_sentiments("nrc")
+
+output = x %>%
+  unnest_tokens(word, text) %>%
+  inner_join(nrc) %>%
+  filter(sentiment == emotion) %>%
+  count(word, sort = TRUE)
+
+return(output)
+
+}
 
