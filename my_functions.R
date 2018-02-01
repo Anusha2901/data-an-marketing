@@ -247,7 +247,7 @@ return(output)
 
 }
 
-word_counts = function(x){ 
+word_counts = function(x,num){ 
   bing = get_sentiments("bing")
   bing_word_counts <- x %>%
                     unnest_tokens(word, text) %>%
@@ -256,7 +256,7 @@ word_counts = function(x){
                     ungroup()
   
   bing_word_counts %>%
-  filter(n > 3) %>%
+  filter(n > num) %>%
   mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(word, n, fill = sentiment)) +
