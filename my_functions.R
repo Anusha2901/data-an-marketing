@@ -225,7 +225,9 @@ senti.nrc = x %>%
   count(sentiment, index = linenumber %/% 1, sort = FALSE) %>%  # %/% gives quotient
   mutate(method = "nrc")
 
-a = data.frame(senti.nrc %>% spread(sentiment, n, fill = 0))
+a = data.frame(senti.nrc %>% spread(sentiment, n, fill = 0)) %>%
+    mutate(polarity = (positive - negative)) %>% 
+  arrange(desc(polarity), index)
 
 return(a)
 
