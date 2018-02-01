@@ -247,3 +247,21 @@ return(output)
 
 }
 
+word_counts = function(x){ 
+  bing = get_sentiments("bing")
+  bing_word_counts <- x %>%
+                    unnest_tokens(word, text) %>%
+                    inner_join(bing) %>%
+                    count(word, sentiment, sort = TRUE) %>%
+                    ungroup()
+  
+  bing_word_counts %>%
+  filter(n > 3) %>%
+  mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ylab("Contribution to sentiment")
+
+}
